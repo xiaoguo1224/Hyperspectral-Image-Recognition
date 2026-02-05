@@ -8,7 +8,7 @@
       <excludeFolder url="file://$MODULE_DIR$/data" />
       <excludeFolder url="file://$MODULE_DIR$/outputs" />
     </content>
-    <orderEntry type="jdk" jdkName="Remote /home/hongdaguo/.conda/envs/dmssn (sftp://hongdaguo@172.24.53.77:22null)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="dmssn" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TemplatesService">

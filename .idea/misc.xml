@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="dmssn" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Remote /home/hongdaguo/.conda/envs/dmssn (sftp://hongdaguo@172.24.53.77:22null)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="dmssn" project-jdk-type="Python SDK" />
 </project>
