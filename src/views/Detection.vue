@@ -1,86 +1,79 @@
 <template>
   <div class="detection-container">
     <el-row :gutter="20">
-      <el-col :span="6">
-        <el-card header="推理任务配置">
-          <el-form label-position="top">
-            <el-form-item label="检测模型选择">
-              <el-select v-model="form.modelId" placeholder="请选择算法">
-                <el-option label="ACEN (3D-CNN融合网络)" value="acen"/>
-                <el-option label="YOLOv8s-Spectral" value="yolo"/>
-                <el-option label="RX 异常检测 (基线)" value="rx"/>
-              </el-select>
-            </el-form-item>
-
-            <el-form-item label="数据导入 (.mat / .jpg)">
-              <el-upload
-                  class="upload-demo"
-                  drag
-                  action="/api/upload"
-                  :on-success="onUploadSuccess"
-                  multiple
-              >
-                <el-icon class="el-icon--upload">
-                  <upload-filled/>
-                </el-icon>
-                <div class="el-upload__text">
-                  将 HSOD-BIT 格式数据拖到此处，或<em>点击上传</em>
-                </div>
+      <el-col :span="9">
+        <el-card header="数据成对导入">
+          <el-alert title="请确保左右两侧文件上传的顺序完全一致" type="warning" show-icon :closable="false"/>
+          <div class="dual-upload-wrapper">
+            <div class="upload-column">
+              <p class="upload-label">1. 原始伪彩图 (.jpg)</p>
+              <el-upload action="#" multiple :auto-upload="false" :on-change="handlePicChange" :file-list="picFiles"
+                         list-type="text">
+                <el-button type="primary" size="small">选择图片群</el-button>
               </el-upload>
-            </el-form-item>
-
-            <el-button
-                type="primary"
-                @click="handleInference"
-                :loading="isProcessing"
-                style="width: 100%"
-            >
-              执行目标识别
-            </el-button>
-          </el-form>
+            </div>
+            <div class="upload-column">
+              <p class="upload-label">2. 高光谱文件 (.mat)</p>
+              <el-upload action="#" multiple :auto-upload="false" :on-change="handleMatChange" :file-list="matFiles">
+                <el-button type="info" size="small">选择数据群</el-button>
+              </el-upload>
+            </div>
+          </div>
+          <el-button type="success" @click="pairByOrder"
+                     :disabled="picFiles.length === 0 || picFiles.length !== matFiles.length"
+                     style="width: 100%; margin-top: 20px;">
+            按顺序配对并开始识别
+          </el-button>
         </el-card>
 
-        <el-card class="status-card" header="服务器资源监控">
-          <div class="status-item">
-            <span>GPU 显存占用</span>
-            <el-progress :percentage="sysStatus.gpu" color="#67c23a"/>
-          </div>
-          <div class="status-item">
-            <span>推理引擎响应</span>
-            <el-tag :type="sysStatus.active ? 'success' : 'danger'">
-              {{ sysStatus.active ? '在线' : '离线' }}
-            </el-tag>
-          </div>
+        <el-card class="mt-20" header="检测任务列表">
+          <el-table ref="taskTable" :data="pairedTasks" highlight-current-row @current-change="handleTaskSelect">
+            <el-table-column type="index" label="序号" width="60"/>
+            <el-table-column prop="name" label="任务名称" show-overflow-tooltip/>
+            <el-table-column label="状态" width="80">
+              <template #default="scope">
+                <el-tag :type="scope.row.processed ? 'success' : 'info'">
+                  {{ scope.row.processed ? '完成' : '待机' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+          </el-table>
         </el-card>
       </el-col>
 
-      <el-col :span="18">
-        <el-card>
+      <el-col :span="15">
+        <el-card v-if="currentTask" class="result-detail-card">
           <template #header>
             <div class="result-header">
-              <span>识别结果可视化 (像素级) </span>
-              <div class="metrics-tags">
-                <el-tag size="small">mAP: {{ results.mAP }}</el-tag>
-                <el-tag size="small" type="warning">F1: {{ results.f1 }}</el-tag>
-                <el-tag size="small" type="info">耗时: {{ results.latency }}s</el-tag>
+              <span>正在查看：{{ currentTask.name }}</span>
+              <div class="metrics-tags" v-if="currentTask.processed">
+                <el-tag size="small">mAP: {{ currentTask.mAP }}</el-tag>
+                <el-tag size="small" type="warning">F1: {{ currentTask.f1 }}</el-tag>
+                <el-tag size="small" type="info">推理速度: {{ currentTask.latency }}s</el-tag>
               </div>
+              <el-button v-else type="primary" size="small" @click="runInference(currentTask)" :loading="isProcessing">
+                执行当前识别
+              </el-button>
             </div>
           </template>
 
           <div class="viewer-layout">
             <div class="view-box">
               <p>原始高光谱伪彩图</p>
-              <el-image :src="results.rawSrc" fit="cover">
-                <template #placeholder>
-                  <div class="img-load">等待输入...</div>
+              <el-image :src="currentTask.jpgUrl" fit="contain">
+                <template #error>
+                  <div class="img-load">无预览图</div>
                 </template>
               </el-image>
             </div>
             <div class="view-box highlight">
-              <p>显著性检测 Mask [cite: 5]</p>
-              <el-image :src="results.maskSrc" fit="cover">
+              <p>显著性检测结果 (Mask)</p>
+              <el-image :src="currentTask.maskUrl" fit="contain">
                 <template #placeholder>
-                  <div class="img-load">计算中...</div>
+                  <div class="img-load">{{ currentTask.processed ? '渲染中...' : '等待识别' }}</div>
+                </template>
+                <template #error>
+                  <div class="img-load">等待结果</div>
                 </template>
               </el-image>
             </div>
@@ -88,106 +81,168 @@
 
           <div ref="chartRef" class="spectral-chart"></div>
         </el-card>
+
+        <el-empty v-else description="请上传并点击左侧列表中的任务进行识别预览"/>
       </el-col>
     </el-row>
   </div>
 </template>
 
 <script setup>
-import {ref, reactive, onMounted, nextTick} from 'vue';
+import {ref, reactive, nextTick, onMounted} from 'vue';
+import {ElMessage} from 'element-plus';
 import * as echarts from 'echarts';
-import {UploadFilled} from '@element-plus/icons-vue';
 
-// 响应式数据
+const picFiles = ref([]);
+const matFiles = ref([]);
+const pairedTasks = ref([]);
+const currentTask = ref(null);
 const isProcessing = ref(false);
 const chartRef = ref(null);
-const form = reactive({
-  modelId: 'acen'
-});
-
-// 系统状态监控
-const sysStatus = reactive({
-  gpu: 15,
-  active: true
-});
-
-// 模拟识别结果数据，需符合任务书指标：mAP≥75%, F1≥0.70
-const results = reactive({
-  rawSrc: '',
-  maskSrc: '',
-  mAP: '0.00',
-  f1: '0.00',
-  latency: '0.0'
-});
-
-// 初始化 ECharts：展示 200 个波段的光谱特征
+const taskTable = ref(null);
 let myChart = null;
-const initSpectralChart = () => {
-  if (myChart) myChart.dispose();
-  myChart = echarts.init(chartRef.value);
-  const bands = Array.from({length: 200}, (_, i) => i + 1);
 
-  myChart.setOption({
-    title: {text: '典型像元光谱特征分析'},
-    tooltip: {trigger: 'axis'},
-    xAxis: {name: '波段 (Band)', data: bands},
-    yAxis: {name: '反射率 (Reflectance)', type: 'value'},
-    series: [{
-      name: '目标光谱',
-      type: 'line',
-      smooth: true,
-      data: [] // 此处由后端推理后返回
-    }]
+const handlePicChange = (file, fileList) => {
+  picFiles.value = fileList;
+};
+const handleMatChange = (file, fileList) => {
+  matFiles.value = fileList;
+};
+
+// 模拟识别逻辑：符合任务书指标
+const pairByOrder = () => {
+  if (picFiles.value.length !== matFiles.value.length) {
+    ElMessage.error('图片数量与MAT文件数量不匹配！');
+    return;
+  }
+
+  pairedTasks.value = picFiles.value.map((pic, index) => {
+    // 生成本地预览 URL
+    const localUrl = URL.createObjectURL(pic.raw);
+    return {
+      name: pic.name.split('.')[0],
+      jpgUrl: localUrl,
+      maskUrl: '',
+      mAP: '0.00',
+      f1: '0.00',
+      latency: '0.0',
+      processed: false,
+      spectralData: []
+    }
+  });
+
+  ElMessage.success(`成功配对 ${pairedTasks.value.length} 组数据`);
+
+  // 核心改进：自动选中第一条并开始识别，让用户立刻看到效果
+  if (pairedTasks.value.length > 0) {
+    nextTick(() => {
+      taskTable.value.setCurrentRow(pairedTasks.value[0]);
+      runInference(pairedTasks.value[0]);
+    });
+  }
+};
+
+const handleTaskSelect = (val) => {
+  currentTask.value = val;
+  nextTick(() => {
+    initChart();
+    if (val && val.processed) {
+      updateChart(val.spectralData);
+    }
   });
 };
 
-// 执行推理逻辑
-const handleInference = () => {
+const runInference = (task) => {
+  if (!task || task.processed) return;
   isProcessing.value = true;
-  // 模拟 API 请求 SpringBoot
+
+  // 模拟后端处理时长：任务书要求响应时间 ≤ 3s
   setTimeout(() => {
-    results.mAP = '0.78';
-    results.f1 = '0.73';
-    results.latency = '1.2';
-    // 模拟更新图表数据
-    myChart.setOption({
-      series: [{data: Array.from({length: 200}, () => Math.random() * 0.8)}]
-    });
+    task.processed = true;
+    // 模拟数据指标：符合任务书 mAP@0.5 >= 75%
+    task.mAP = (0.76 + Math.random() * 0.1).toFixed(2);
+    task.f1 = (0.71 + Math.random() * 0.1).toFixed(2);
+    task.latency = (1.2 + Math.random() * 1.5).toFixed(1);
+
+    // 模拟结果图：这里直接用原图模拟 Mask 效果，实际开发中替换为后端返回的路径
+    task.maskUrl = task.jpgUrl;
+
+    // 模拟 200 个波段的光谱反射率数据
+    task.spectralData = Array.from({length: 200}, () => (Math.random() * 0.6 + 0.1).toFixed(4));
+
+    if (currentTask.value === task) {
+      updateChart(task.spectralData);
+    }
     isProcessing.value = false;
-  }, 1500);
+    ElMessage.success(`${task.name} 识别完成`);
+  }, 1800);
 };
 
-onMounted(() => {
-  initSpectralChart();
-  window.addEventListener('resize', () => myChart && myChart.resize());
-});
+const initChart = () => {
+  if (!chartRef.value) return;
+  if (myChart) myChart.dispose();
+  myChart = echarts.init(chartRef.value);
+  myChart.setOption({
+    title: {text: '200波段光谱特征曲线 (HSOD-BIT)', textStyle: {fontSize: 14}},
+    tooltip: {trigger: 'axis'},
+    grid: {left: '3%', right: '4%', bottom: '3%', containLabel: true},
+    xAxis: {name: '波段', type: 'category', data: Array.from({length: 200}, (_, i) => i + 1)},
+    yAxis: {name: '反射率', type: 'value', min: 0, max: 1},
+    series: [{name: '特征指纹', type: 'line', smooth: true, data: [], color: '#409EFF', areaStyle: {opacity: 0.1}}]
+  });
+};
+
+const updateChart = (data) => {
+  if (myChart) {
+    myChart.setOption({series: [{data: data}]});
+  }
+};
 </script>
 
 <style scoped>
+/* 保持原有样式并微调预览框高度 */
 .detection-container {
   padding: 20px;
   background-color: #f0f2f5;
   min-height: 100vh;
 }
 
-.status-card {
-  margin-top: 20px;
+.dual-upload-wrapper {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+  gap: 10px;
 }
 
-.status-item {
-  margin-bottom: 15px;
-  font-size: 14px;
+.upload-column {
+  flex: 1;
+  padding: 10px;
+  border: 1px dashed #dcdfe6;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.upload-label {
+  font-size: 12px;
+  font-weight: bold;
+  color: #606266;
+  margin-bottom: 10px;
+}
+
+.mt-20 {
+  margin-top: 20px;
 }
 
 .result-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
 }
 
 .metrics-tags {
   display: flex;
-  gap: 8px;
+  gap: 10px;
 }
 
 .viewer-layout {
@@ -198,30 +253,34 @@ onMounted(() => {
 
 .view-box {
   flex: 1;
-  border: 1px dashed #dcdfe6;
+  border: 1px solid #ebeef5;
   border-radius: 4px;
   padding: 10px;
   text-align: center;
+  background: #fff;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
 }
 
 .view-box p {
   font-size: 13px;
-  color: #606266;
+  color: #909399;
   margin-bottom: 8px;
+  font-weight: bold;
 }
 
 .spectral-chart {
   height: 320px;
-  margin-top: 24px;
+  margin-top: 20px;
   width: 100%;
 }
 
 .img-load {
-  height: 200px;
+  height: 280px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #f5f7fa;
-  color: #909399;
+  color: #c0c4cc;
+  border-radius: 4px;
 }
 </style>
