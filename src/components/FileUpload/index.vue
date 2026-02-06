@@ -12,6 +12,7 @@
         :on-success="handleUploadSuccess"
         :show-file-list="false"
         :headers="headers"
+        name="files"
         class="upload-file-uploader"
     >
       <el-button type="primary">选取文件</el-button>
@@ -41,14 +42,11 @@
 </template>
 
 <script setup>
-import {ref, computed, watch, getCurrentInstance} from 'vue'
+import {ref, computed, watch} from 'vue'
 import {ElMessage, ElLoading} from 'element-plus'
 
-// 获取全局属性 (如果你在全局配置了 $modal 等)
-// const { proxy } = getCurrentInstance()
-
 const props = defineProps({
-  // 值 (注意：Vue3 v-model 默认属性名为 modelValue)
+  // 值 (逗号分隔的相对路径字符串，例如 "/profile/upload/1.png,/profile/upload/2.png")
   modelValue: {
     type: [String, Object, Array],
     default: () => []
@@ -66,7 +64,7 @@ const props = defineProps({
   // 文件类型
   fileType: {
     type: Array,
-    default: () => ['doc', 'xls', 'ppt', 'txt', 'pdf', 'docx', 'xlsx', 'pptx', 'mp3', 'mp4', 'zip', 'rar']
+    default: () => ['doc', 'xls', 'ppt', 'txt', 'pdf', 'docx', 'xlsx', 'pptx', 'mp3', 'mp4', 'zip', 'rar', 'jpg', 'png']
   },
   // 是否显示提示
   isShowTip: {
@@ -80,12 +78,14 @@ const emit = defineEmits(['update:modelValue'])
 // 变量定义
 const number = ref(0)
 const uploadList = ref([])
-const baseUrl = import.meta.env.VITE_APP_BASE_API // 注意：Vite 通常使用 VITE_ 前缀
+// 这里的 VITE_APP_BASE_API 对应后端服务地址前缀，例如 "http://localhost:8080"
+const baseUrl = import.meta.env.VITE_APP_BASE_API
+// 修改接口地址为 /common/uploads
 const uploadFileUrl = ref(import.meta.env.VITE_APP_BASE_API + '/common/uploads')
 const fileList = ref([])
 const fileUploadRef = ref(null)
 const loadingInstance = ref(null)
-// 如果你需要设置 headers (例如 token)，可以在这里定义
+// 如果你需要设置 headers (例如 token)，可以在这里定义，通常从 store 或 cookie 获取
 const headers = ref({
   // Authorization: 'Bearer ' + getToken()
 })
@@ -95,29 +95,30 @@ const showTip = computed(() => {
   return props.isShowTip && (props.fileType || props.fileSize)
 })
 
-// 监听 modelValue 变化
-watch(() => props.modelValue, (val) => {
-  if (val) {
-    let temp = 1
-    // 首先将值转为数组
-    const list = Array.isArray(val) ? val : val.split(',')
-    // 然后将数组转为对象数组
-    fileList.value = list.map(item => {
-      if (typeof item === 'string') {
-        item = {name: item, url: item}
-      }
-      // 添加uid防止key重复
-      item.uid = item.uid || new Date().getTime() + temp++
-      return item
-    })
-  } else {
-    fileList.value = []
-  }
-}, {deep: true, immediate: true})
+// // 监听 modelValue 变化，回显数据
+// watch(() => props.modelValue, (val) => {
+//   if (val) {
+//     let temp = 1
+//     // 首先将值转为数组
+//     const list = Array.isArray(val) ? val : val.split(',')
+//     // 然后将数组转为对象数组
+//     fileList.value = list.map(item => {
+//       if (typeof item === 'string') {
+//         // 回显时，name 和 url 暂时都设为路径，具体文件名由 getFileName 处理
+//         item = {name: item, url: item}
+//       }
+//       // 添加uid防止key重复
+//       item.uid = item.uid || new Date().getTime() + temp++
+//       return item
+//     })
+//   } else {
+//     fileList.value = []
+//   }
+// }, {deep: true, immediate: true})
 
 // 方法
 
-// 获取文件名称
+// 获取文件名称 (处理路径字符串)
 const getFileName = (name) => {
   if (name && name.lastIndexOf('/') > -1) {
     return name.slice(name.lastIndexOf('/') + 1)
@@ -172,7 +173,23 @@ const handleUploadError = (err) => {
 // 上传成功回调
 const handleUploadSuccess = (res, file) => {
   if (res.code === 200) {
-    uploadList.value.push({name: res.fileName, url: res.fileName})
+    // 后端返回的是逗号分隔的字符串：
+    // res.fileNames -> 相对路径 (用于保存到数据库)
+    // res.originalFilenames -> 原始文件名 (用于展示)
+    // res.urls -> 完整URL
+
+    // 虽然 el-upload 默认一次发送一个文件，但后端接口逻辑是通用的
+    // 我们这里按照后端逻辑解析逗号分隔符，以防未来改为并发批量上传
+    const relativePaths = res.fileNames ? res.fileNames.split(',') : [];
+    const originalNames = res.originalFilenames ? res.originalFilenames.split(',') : [];
+
+    relativePaths.forEach((path, index) => {
+      uploadList.value.push({
+        name: originalNames[index] || path, // 优先显示原始文件名
+        url: path
+      })
+    });
+
     uploadedSuccessfully()
   } else {
     number.value--
@@ -195,6 +212,7 @@ const uploadedSuccessfully = () => {
     fileList.value = fileList.value.concat(uploadList.value)
     uploadList.value = []
     number.value = 0
+    // 将文件列表转为逗号分隔的字符串传给父组件
     emit('update:modelValue', listToString(fileList.value))
     if (loadingInstance.value) loadingInstance.value.close()
   }

@@ -3,7 +3,7 @@
     <div class="error-content">
       <h1 class="error-code" style="color: #F56C6C;">401</h1>
       <p class="error-msg">身份认证失效，请重新登录系统。</p>
-      <el-button type="danger" @click="$router.push('/login')">去登录</el-button>
+      <el-button type="danger" @click="$router.push('/predict')">去登录</el-button>
     </div>
   </div>
 </template>

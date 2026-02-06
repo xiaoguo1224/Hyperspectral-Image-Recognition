@@ -55,17 +55,6 @@
           </el-breadcrumb>
         </div>
         <div class="header-right">
-          <el-dropdown>
-            <span class="user-info">
-              郭洪达 (管理员) <el-icon><ArrowDown/></el-icon>
-            </span>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item>个人中心</el-dropdown-item>
-                <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
         </div>
       </el-header>
 
@@ -101,10 +90,6 @@ const currentRouteTitle = computed(() => {
   return route.meta.title || '控制台';
 });
 
-const handleLogout = () => {
-  // 这里清除 token 并跳转登录页
-  router.push('/login');
-};
 </script>
 
 <style scoped>

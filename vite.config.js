@@ -20,14 +20,38 @@ export default defineConfig(({mode}) => {
         ],
         server: {
             proxy: {
-                // 4. 使用加载到的 env 对象来访问变量
                 [env.VITE_APP_BASE_API]: {
-                    // target: env.VITE_APP_API_URL,
-                    target: 'localhost:8080',
+                    target: env.VITE_APP_API_URL,
                     changeOrigin: true,
-                    logLevel: 'debug',
-                    // 5. 注意：Vite 的代理配置使用 'rewrite' 函数，而不是 webpack 的 'pathRewrite' 对象
-                    rewrite: (path) => path.replace(new RegExp('^' + env.VITE_APP_BASE_API), '')
+                    // 路径重写
+                    rewrite: (path) => path.replace(new RegExp('^' + env.VITE_APP_BASE_API), ''),
+
+                    // === 核心调试代码：打印代理日志 ===
+                    configure: (proxy, options) => {
+                        // 1. 监听代理发出的请求 (Proxy Request)
+                        proxy.on('proxyReq', (proxyReq, req, res) => {
+                            // 获取完整的重写后的 URL
+                            const realUrl = options.target + proxyReq.path;
+
+                            console.log('\n--------- 代理请求调试 ---------');
+                            console.log(`1. 前端请求: ${req.url}`);
+                            console.log(`2. 代理转发: ${realUrl}`);
+                            console.log(`3. 请求方法: ${req.method}`);
+                            // 如果想看 Header，可以解开下面这行
+                            // console.log('Header:', proxyReq.getHeaders());
+                        });
+
+                        // 2. 监听代理收到的响应 (Proxy Response)
+                        proxy.on('proxyRes', (proxyRes, req, res) => {
+                            console.log(`4. 后端响应: Status ${proxyRes.statusCode}`);
+                            console.log('------------------------------\n');
+                        });
+
+                        // 3. 监听代理错误
+                        proxy.on('error', (err, req, res) => {
+                            console.error('!!! 代理发生错误 !!!', err);
+                        });
+                    }
                 }
             }
         },

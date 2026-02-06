@@ -17,7 +17,7 @@
         <el-button type="success" @click="handleRegister" class="submit-btn">立即注册</el-button>
         <div class="footer-links">
           已有账号？
-          <router-link to="/login">返回登录</router-link>
+          <router-link to="/predict">返回登录</router-link>
         </div>
       </el-form>
     </el-card>

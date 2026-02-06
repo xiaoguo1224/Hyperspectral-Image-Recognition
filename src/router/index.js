@@ -6,7 +6,7 @@ const Layout = () => import('@/layout/index.vue')
 // 公共路由
 export const constantRoutes = [
     {
-        path: '/login',
+        path: '/predict',
         component: () => import('@/views/user/login.vue'),
         hidden: true
     },

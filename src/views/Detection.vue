@@ -23,7 +23,7 @@
                   v-model="matFilesStr"
                   :file-type="['mat']"
                   :limit="20"
-                  :file-size="500"
+                  :file-size="1000"
                   :is-show-tip="true"
               />
             </div>
@@ -73,7 +73,7 @@
           <div class="viewer-layout">
             <div class="view-box">
               <p>原始高光谱伪彩图</p>
-              <el-image :src="currentTask.jpgUrl" fit="contain">
+              <el-image :src="resolveUrl(currentTask.jpgUrl)" fit="contain">
                 <template #error>
                   <div class="img-load">无预览图</div>
                 </template>
@@ -106,7 +106,7 @@ import {ref, computed, nextTick, onMounted} from 'vue';
 import {ElMessage} from 'element-plus';
 import * as echarts from 'echarts';
 import FileUpload from '@/components/FileUpload/index.vue';
-import {demo} from '@/api/login.js'
+import {predict} from "@/api/predict.js";
 // 状态变量
 const picFilesStr = ref(""); // 接收 FileUpload 的逗号分隔字符串
 const matFilesStr = ref("");
@@ -120,9 +120,6 @@ let myChart = null;
 // 获取 Base URL 用于拼接图片路径（如果后端返回的是相对路径）
 const baseUrl = import.meta.env.VITE_APP_BASE_API || '';
 
-onMounted(() => {
-  demo()
-})
 
 // 计算是否可以配对
 const canPair = computed(() => {
@@ -148,8 +145,8 @@ const resolveUrl = (path) => {
   return `${baseUrl}${path}`; // 拼接后端基础路径
 };
 
-// 核心逻辑：解析字符串并配对
-const pairByOrder = () => {
+// 核心逻辑：按顺序配对并【全量并行】识别
+const pairByOrder = async () => {
   const picList = picFilesStr.value ? picFilesStr.value.split(',') : [];
   const matList = matFilesStr.value ? matFilesStr.value.split(',') : [];
 
@@ -158,28 +155,35 @@ const pairByOrder = () => {
     return;
   }
 
+  // 1. 生成所有任务
   pairedTasks.value = picList.map((picPath, index) => {
-    const taskName = getFileName(picPath); // 从路径提取文件名
+    const taskName = getFileName(picPath);
     return {
       name: taskName,
-      jpgUrl: resolveUrl(picPath), // 使用上传后返回的 URL
-      matPath: matList[index],     // 保存 mat 文件路径供后端调用
+      jpgUrl: picPath,
+      matPath: matList[index],
       maskUrl: '',
       mAP: '0.00',
       f1: '0.00',
       latency: '0.0',
       processed: false,
+      processing: false, // 新增：标记单个任务是否正在处理
       spectralData: []
-    }
+    };
   });
 
-  ElMessage.success(`成功配对 ${pairedTasks.value.length} 组数据`);
+  ElMessage.success(`成功配对 ${pairedTasks.value.length} 组数据，开始并行识别...`);
 
-  // 自动选中第一条并开始模拟识别
+  // 2. 核心改进：并行启动所有任务
+  // forEach 不会等待内部异步逻辑完成，会瞬间启动所有任务
+  for (const task of pairedTasks.value) {
+    await runInference(task); // 一个跑完再跑下一个
+  }
+
+  // 默认在表格中选中第一项以供查看
   if (pairedTasks.value.length > 0) {
     nextTick(() => {
       taskTable.value.setCurrentRow(pairedTasks.value[0]);
-      runInference(pairedTasks.value[0]);
     });
   }
 };
@@ -194,29 +198,52 @@ const handleTaskSelect = (val) => {
   });
 };
 
-const runInference = (task) => {
-  if (!task || task.processed) return;
-  isProcessing.value = true;
+const runInference = async (task) => {
+  // 1. 检查任务是否已经在处理或已完成，防止重复触发
+  if (!task || task.processed || task.processing) return;
 
-  // 模拟后端推理过程
-  setTimeout(() => {
-    task.processed = true;
-    task.mAP = (0.76 + Math.random() * 0.1).toFixed(2);
-    task.f1 = (0.71 + Math.random() * 0.1).toFixed(2);
-    task.latency = (1.2 + Math.random() * 1.5).toFixed(1);
+  // 2. 开启单个任务的加载状态（互不阻塞的关键）
+  task.processing = true;
 
-    // 模拟结果：直接使用原图 URL 作为 Mask 演示
-    task.maskUrl = task.jpgUrl;
+  try {
+    // 3. 发起异步请求（此处会并行执行，无需等待上一个任务完成）
+    const res = await predict(task);
 
-    // 模拟光谱数据
-    task.spectralData = Array.from({length: 200}, () => (Math.random() * 0.6 + 0.1).toFixed(4));
+    console.log("预测返回结果：", res);
 
-    if (currentTask.value === task) {
-      updateChart(task.spectralData);
+    if (res.code === 200) {
+      const data = res.data;
+      // 4. 将后端返回的真实数据填充到任务对象
+      task.processed = true;
+      task.mAP = data.mapValue || '0.00';
+      task.f1 = data.f1Score || '0.00';
+      task.latency = data.latency || '0.0';
+
+      // 这里的路径替换逻辑需结合你之前的 baseUrl 映射
+      task.maskUrl = import.meta.env.VITE_APP_BASE_API + data.maskPath;
+
+      // 解析光谱 JSON 数据
+      if (data.spectralData) {
+        task.spectralData = JSON.parse(data.spectralData);
+      }
+
+      // 5. 联动更新：如果用户当前盯着这个任务，立即刷新图表
+      if (currentTask.value && currentTask.value.name === task.name) {
+        updateChart(task.spectralData);
+      }
+
+      ElMessage.success(`${task.name} 识别完成`);
+    } else if (res.code === 601) {
+    } else {
+      ElMessage.error(`${task.name} 识别失败: ${res.msg}`);
     }
-    isProcessing.value = false;
-    ElMessage.success(`${task.name} 识别完成`);
-  }, 1800);
+  } catch (error) {
+    console.error("请求异常:", error);
+    ElMessage.error(`${task.name} 请求异常`);
+  } finally {
+    // 6. 无论成功失败，关闭当前任务的加载状态
+    task.processing = false;
+  }
 };
 
 const initChart = () => {
@@ -272,6 +299,7 @@ const updateChart = (data) => {
 
 .mt-20 {
   margin-top: 20px;
+  min-height: 50vh;
 }
 
 .result-header {
