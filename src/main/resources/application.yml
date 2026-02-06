@@ -1,6 +1,31 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/xjp?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&allowMultiQueries=true
+    url: jdbc:mysql://localhost:3306/hsi_detection_system?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&allowMultiQueries=true
     username: root
     password: 2728885797ghdsx.
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+predict:
+  url: http://172.0.0.1/
+  api: /predict
+
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*Mapper.xml
+  type-aliases-package: com.ruoyi.**.domain
+  global-config:
+    db-config:
+      id-type: auto
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+
+# 项目相关配置
+file:
+  # 文件路径 示例（ Windows配置D:/ruoyi/uploadPath，Linux配置 /home/ruoyi/uploadPath）
+  profile: D:/ruoyi/uploadPath
+  # 获取ip地址开关
+  addressEnabled: false
+  # 验证码类型 math 数字计算 char 字符验证
+  captchaType: math
