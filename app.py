@@ -3,11 +3,24 @@ from flask import Flask, request, jsonify
 from modules.inference_module import HyperspectralInference
 
 app = Flask(__name__)
+import os
+# 假设这段代码是在 app.py 中运行的
+from modules.inference_module import HyperspectralInference  # 根据你的目录结构导入
 
-# 全局初始化，模型只加载一次
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+model_path_abs = os.path.join(BASE_DIR, 'static', 'DMSSN_double_epoch_100.pth')
+
+# output_dir_abs = os.path.join(BASE_DIR, 'static', 'results')
+
+output_dir_abs = "F:/Temp/uploadPath/output"
+
+print(f"[DEBUG] Model Path: {model_path_abs}")
+print(f"[DEBUG] Output Dir: {output_dir_abs}")
+
 infer_engine = HyperspectralInference(
-    model_path='../outputs/DMSSN_double_epoch_100.pth',
-    output_dir='../static/results/'
+    model_path=model_path_abs,
+    output_dir=output_dir_abs
 )
 
 

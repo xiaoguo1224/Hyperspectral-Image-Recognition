@@ -10,7 +10,7 @@ from models.DSST import ACEN
 
 
 class HyperspectralInference:
-    def __init__(self, model_path='../outputs/DMSSN_double_epoch_100.pth', output_dir='../outputs/pic/'):
+    def __init__(self, model_path='/static/DMSSN_double_epoch_100.pth', output_dir='/static/results/'):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.output_dir = output_dir
         self.model_path = model_path
@@ -70,3 +70,11 @@ class HyperspectralInference:
                         error_list.append(img_id)
 
         return error_list, complete_file_list
+
+
+if __name__ == '__main__':
+    # 全局初始化，模型只加载一次
+    infer_engine = HyperspectralInference(
+        model_path='/static/DMSSN_double_epoch_100.pth',
+        output_dir='/static/results/'
+    )
