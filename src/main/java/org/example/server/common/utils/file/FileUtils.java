@@ -9,6 +9,8 @@ import org.example.server.common.config.Config;
 import org.example.server.common.utils.DateUtils;
 import org.example.server.common.utils.StringUtils;
 import org.example.server.common.utils.uuid.IdUtils;
+import org.springframework.util.DigestUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.net.URLEncoder;
@@ -240,5 +242,11 @@ public class FileUtils {
         }
         String baseName = FilenameUtils.getBaseName(fileName);
         return baseName;
+    }
+
+    public static String getFileMd5(MultipartFile file) throws IOException {
+        try (InputStream is = file.getInputStream()) {
+            return DigestUtils.md5DigestAsHex(is);
+        }
     }
 }

@@ -1,4 +1,11 @@
 spring:
+  servlet:
+    multipart:
+      enabled: true
+      # 单个文件的最大限制
+      max-file-size: 1000MB
+      # 单个请求的总限制（包含所有上传文件）
+      max-request-size: 1000MB
   datasource:
     url: jdbc:mysql://localhost:3306/hsi_detection_system?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&allowMultiQueries=true
     username: root
