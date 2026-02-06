@@ -70,7 +70,7 @@ public class CommonController {
                     // 根据你提供的 FileTypeUtils 获取类型
                     hsiFile.setFileType(FileTypeUtils.getFileType(originalFilename));
                     hsiFile.setUploadTime(LocalDateTime.now());
-
+                    hsiFile.setNewName(FileUtils.getName(fileName));
                     hsiFileMapper.insert(hsiFile);
                 }
 

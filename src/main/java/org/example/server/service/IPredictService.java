@@ -3,5 +3,5 @@ package org.example.server.service;
 import org.example.server.domain.DetectionTask;
 
 public interface IPredictService {
-    DetectionTask executePredict(Long matFileId, Long jpgFileId);
+    DetectionTask executePredict(DetectionTask task);
 }

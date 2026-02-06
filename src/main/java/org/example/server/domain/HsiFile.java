@@ -13,6 +13,7 @@ public class HsiFile {
     @TableId(type = IdType.AUTO)
     private Long fileId;
     private String fileName;
+    private String newName;
     private String fileMd5;
     private String storagePath;
     private String fileType; // mat 或 jpg

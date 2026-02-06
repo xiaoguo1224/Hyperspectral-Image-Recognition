@@ -1,5 +1,6 @@
 package org.example.server.common.config;
 
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Component;
  * 读取项目相关配置
  *
  */
+@Data
 @Component
 @ConfigurationProperties(prefix = "file")
 public class Config {
@@ -15,6 +17,11 @@ public class Config {
      * 上传路径
      */
     private static String profile;
+
+    /*
+     * 输出路径
+     * */
+    private static String outputPath;
 
     /**
      * 获取地址开关
@@ -33,6 +40,14 @@ public class Config {
 
     public void setProfile(String profile) {
         Config.profile = profile;
+    }
+
+    public static String getOutputPath() {
+        return outputPath;
+    }
+
+    public void setOutputPath(String outputPath) {
+        Config.outputPath = outputPath;
     }
 
     public static boolean isAddressEnabled() {

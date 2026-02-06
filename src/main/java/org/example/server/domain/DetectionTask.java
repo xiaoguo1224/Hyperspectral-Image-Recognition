@@ -1,12 +1,16 @@
 package org.example.server.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
 @TableName("detection_task")
+@NoArgsConstructor
+@AllArgsConstructor
 public class DetectionTask {
     @TableId(type = IdType.AUTO)
     private Long taskId;
@@ -22,4 +26,9 @@ public class DetectionTask {
     private Integer status; // 0-待机, 1-识别中, 2-已完成
     private LocalDateTime createTime;
     private LocalDateTime finishTime;
+
+    @TableField(exist = false)
+    private HsiFile matFile;
+    @TableField(exist = false)
+    private HsiFile jpgFile;
 }
