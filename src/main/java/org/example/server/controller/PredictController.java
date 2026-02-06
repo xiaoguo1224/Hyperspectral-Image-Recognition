@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/detection")
+@RequestMapping("/detection")
 public class PredictController {
 
     private final IPredictService predictService;
@@ -24,5 +24,10 @@ public class PredictController {
 
         DetectionTask task = predictService.executePredict(matId, jpgId);
         return AjaxResult.success("预测成功", task);
+    }
+
+    @GetMapping("/demo1")
+    public AjaxResult demo1(){
+        return AjaxResult.success("success");
     }
 }
