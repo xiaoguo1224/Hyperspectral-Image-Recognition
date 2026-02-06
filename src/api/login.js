@@ -58,3 +58,9 @@ export function getCodeImg() {
     timeout: 20000
   })
 }
+
+export function demo() {
+  return request({
+    url: '/detection/demo1',
+  })
+}

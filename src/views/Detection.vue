@@ -4,24 +4,37 @@
       <el-col :span="9">
         <el-card header="数据成对导入">
           <el-alert title="请确保左右两侧文件上传的顺序完全一致" type="warning" show-icon :closable="false"/>
+
           <div class="dual-upload-wrapper">
             <div class="upload-column">
               <p class="upload-label">1. 原始伪彩图 (.jpg)</p>
-              <el-upload action="#" multiple :auto-upload="false" :on-change="handlePicChange" :file-list="picFiles"
-                         list-type="text">
-                <el-button type="primary" size="small">选择图片群</el-button>
-              </el-upload>
+              <FileUpload
+                  v-model="picFilesStr"
+                  :file-type="['jpg', 'jpeg', 'png']"
+                  :limit="20"
+                  :file-size="10"
+                  :is-show-tip="true"
+              />
             </div>
+
             <div class="upload-column">
               <p class="upload-label">2. 高光谱文件 (.mat)</p>
-              <el-upload action="#" multiple :auto-upload="false" :on-change="handleMatChange" :file-list="matFiles">
-                <el-button type="info" size="small">选择数据群</el-button>
-              </el-upload>
+              <FileUpload
+                  v-model="matFilesStr"
+                  :file-type="['mat']"
+                  :limit="20"
+                  :file-size="500"
+                  :is-show-tip="true"
+              />
             </div>
           </div>
-          <el-button type="success" @click="pairByOrder"
-                     :disabled="picFiles.length === 0 || picFiles.length !== matFiles.length"
-                     style="width: 100%; margin-top: 20px;">
+
+          <el-button
+              type="success"
+              @click="pairByOrder"
+              :disabled="!canPair"
+              style="width: 100%; margin-top: 20px;"
+          >
             按顺序配对并开始识别
           </el-button>
         </el-card>
@@ -89,12 +102,14 @@
 </template>
 
 <script setup>
-import {ref, reactive, nextTick, onMounted} from 'vue';
+import {ref, computed, nextTick, onMounted} from 'vue';
 import {ElMessage} from 'element-plus';
 import * as echarts from 'echarts';
-
-const picFiles = ref([]);
-const matFiles = ref([]);
+import FileUpload from '@/components/FileUpload/index.vue';
+import {demo} from '@/api/login.js'
+// 状态变量
+const picFilesStr = ref(""); // 接收 FileUpload 的逗号分隔字符串
+const matFilesStr = ref("");
 const pairedTasks = ref([]);
 const currentTask = ref(null);
 const isProcessing = ref(false);
@@ -102,26 +117,53 @@ const chartRef = ref(null);
 const taskTable = ref(null);
 let myChart = null;
 
-const handlePicChange = (file, fileList) => {
-  picFiles.value = fileList;
-};
-const handleMatChange = (file, fileList) => {
-  matFiles.value = fileList;
+// 获取 Base URL 用于拼接图片路径（如果后端返回的是相对路径）
+const baseUrl = import.meta.env.VITE_APP_BASE_API || '';
+
+onMounted(() => {
+  demo()
+})
+
+// 计算是否可以配对
+const canPair = computed(() => {
+  if (!picFilesStr.value || !matFilesStr.value) return false;
+  const pics = picFilesStr.value.split(',');
+  const mats = matFilesStr.value.split(',');
+  return pics.length > 0 && pics.length === mats.length;
+});
+
+// 辅助函数：从 URL/路径中提取文件名作为任务名
+const getFileName = (path) => {
+  if (!path) return "Unknown";
+  // 移除路径前缀
+  const fullName = path.split('/').pop();
+  // 移除扩展名
+  return fullName.split('.').slice(0, -1).join('.');
 };
 
-// 模拟识别逻辑：符合任务书指标
+// 辅助函数：处理 URL
+const resolveUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http') || path.startsWith('blob')) return path;
+  return `${baseUrl}${path}`; // 拼接后端基础路径
+};
+
+// 核心逻辑：解析字符串并配对
 const pairByOrder = () => {
-  if (picFiles.value.length !== matFiles.value.length) {
-    ElMessage.error('图片数量与MAT文件数量不匹配！');
+  const picList = picFilesStr.value ? picFilesStr.value.split(',') : [];
+  const matList = matFilesStr.value ? matFilesStr.value.split(',') : [];
+
+  if (picList.length !== matList.length) {
+    ElMessage.error(`数量不匹配：图片 ${picList.length} 张，MAT文件 ${matList.length} 个`);
     return;
   }
 
-  pairedTasks.value = picFiles.value.map((pic, index) => {
-    // 生成本地预览 URL
-    const localUrl = URL.createObjectURL(pic.raw);
+  pairedTasks.value = picList.map((picPath, index) => {
+    const taskName = getFileName(picPath); // 从路径提取文件名
     return {
-      name: pic.name.split('.')[0],
-      jpgUrl: localUrl,
+      name: taskName,
+      jpgUrl: resolveUrl(picPath), // 使用上传后返回的 URL
+      matPath: matList[index],     // 保存 mat 文件路径供后端调用
       maskUrl: '',
       mAP: '0.00',
       f1: '0.00',
@@ -133,7 +175,7 @@ const pairByOrder = () => {
 
   ElMessage.success(`成功配对 ${pairedTasks.value.length} 组数据`);
 
-  // 核心改进：自动选中第一条并开始识别，让用户立刻看到效果
+  // 自动选中第一条并开始模拟识别
   if (pairedTasks.value.length > 0) {
     nextTick(() => {
       taskTable.value.setCurrentRow(pairedTasks.value[0]);
@@ -156,18 +198,17 @@ const runInference = (task) => {
   if (!task || task.processed) return;
   isProcessing.value = true;
 
-  // 模拟后端处理时长：任务书要求响应时间 ≤ 3s
+  // 模拟后端推理过程
   setTimeout(() => {
     task.processed = true;
-    // 模拟数据指标：符合任务书 mAP@0.5 >= 75%
     task.mAP = (0.76 + Math.random() * 0.1).toFixed(2);
     task.f1 = (0.71 + Math.random() * 0.1).toFixed(2);
     task.latency = (1.2 + Math.random() * 1.5).toFixed(1);
 
-    // 模拟结果图：这里直接用原图模拟 Mask 效果，实际开发中替换为后端返回的路径
+    // 模拟结果：直接使用原图 URL 作为 Mask 演示
     task.maskUrl = task.jpgUrl;
 
-    // 模拟 200 个波段的光谱反射率数据
+    // 模拟光谱数据
     task.spectralData = Array.from({length: 200}, () => (Math.random() * 0.6 + 0.1).toFixed(4));
 
     if (currentTask.value === task) {
@@ -197,10 +238,10 @@ const updateChart = (data) => {
     myChart.setOption({series: [{data: data}]});
   }
 };
+
 </script>
 
 <style scoped>
-/* 保持原有样式并微调预览框高度 */
 .detection-container {
   padding: 20px;
   background-color: #f0f2f5;
