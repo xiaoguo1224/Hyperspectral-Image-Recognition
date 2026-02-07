@@ -25,9 +25,15 @@
 
         <el-menu-item index="/detection/index">
           <el-icon>
-            <Search/>
+            <Aim/>
           </el-icon>
           <span>目标检测识别</span>
+        </el-menu-item>
+        <el-menu-item index="/evaluation/index">
+          <el-icon>
+            <Search/>
+          </el-icon>
+          <span>结果评估</span>
         </el-menu-item>
 
         <el-menu-item index="/spectral/library">

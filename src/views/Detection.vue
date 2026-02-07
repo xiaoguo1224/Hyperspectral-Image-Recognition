@@ -262,7 +262,16 @@ const initChart = () => {
 
 const updateChart = (data) => {
   if (myChart) {
-    myChart.setOption({series: [{data: data}]});
+    myChart.setOption({
+      xAxis: {
+        data: Array.from({length: 200}, (_, i) => i + 1) // 横坐标 1-200 波段
+      },
+      series: [{
+        data: data, // 纵坐标 反射率
+        type: 'line',
+        smooth: true
+      }]
+    });
   }
 };
 

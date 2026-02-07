@@ -53,6 +53,18 @@ export const constantRoutes = [
         ]
     },
     {
+        path: '/evaluation',
+        component: Layout,
+        children: [
+            {
+                path: 'index',
+                component: () => import('@/views/Evaluation.vue'),
+                name: 'evaluation',
+                meta: {title: '光谱特征库', icon: 'collection'}
+            }
+        ]
+    },
+    {
         path: '/spectral',
         component: Layout,
         children: [
