@@ -74,6 +74,11 @@ public class PredictController {
             queryWrapper.eq("task_id", task.getTaskId());
         }
         List<DetectionTask> taskList = detectionTaskMapper.selectList(queryWrapper);
+        taskList.forEach(task1 -> {
+            task1.setGtFile(hsiFileMapper.selectById(task1.getGtFileId()));
+            task1.setMatFile(hsiFileMapper.selectById(task1.getMatFileId()));
+            task1.setJpgFile(hsiFileMapper.selectById(task1.getJpgFileId()));
+        });
         return AjaxResult.success("success", taskList);
     }
 
@@ -83,7 +88,7 @@ public class PredictController {
         Integer isRenew = (Integer) params.get("isRenew");
         String gtPath = (String) params.get("gtPath");
 
-        DetectionTask task =detectionTaskMapper.selectById(taskID);
+        DetectionTask task = detectionTaskMapper.selectById(taskID);
         task.setJpgFile(hsiFileMapper.selectOne(new LambdaQueryWrapper<HsiFile>().eq(HsiFile::getFileId, task.getJpgFileId())));
         task.setMatFile(hsiFileMapper.selectOne(new LambdaQueryWrapper<HsiFile>().eq(HsiFile::getFileId, task.getMatFileId())));
         task.setGtFile(hsiFileMapper.selectOne(new LambdaQueryWrapper<HsiFile>().eq(HsiFile::getStoragePath, gtPath)));
