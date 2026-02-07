@@ -14,7 +14,6 @@ spring:
 
 predict:
   url: http://127.0.0.1:5000
-  api: /predict
 
 mybatis-plus:
   mapper-locations: classpath*:mapper/**/*Mapper.xml

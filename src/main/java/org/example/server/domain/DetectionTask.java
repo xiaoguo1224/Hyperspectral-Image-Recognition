@@ -17,12 +17,17 @@ public class DetectionTask {
     private String taskName;
     private Long matFileId;
     private Long jpgFileId;
+    private Long gtFileId;
     private String modelName;
     private String maskPath;
     private String spectralData; // 存储JSON格式反射率
-    private Double mapValue;
-    private Double f1Score;
-    private Double latency;
+    private Double mae;
+    private Double f1;
+    private Double pred;
+    private Double rec;
+    private Double auc;
+    private Double cc;
+    private Double nss;
     private Integer status; // 0-待机, 1-识别中, 2-已完成
     private LocalDateTime createTime;
     private LocalDateTime finishTime;
@@ -31,4 +36,6 @@ public class DetectionTask {
     private HsiFile matFile;
     @TableField(exist = false)
     private HsiFile jpgFile;
+    @TableField(exist = false)
+    private HsiFile gtFile;
 }

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -66,8 +67,33 @@ public class PredictController {
 
     }
 
-    @GetMapping("/demo1")
-    public AjaxResult demo1() {
-        return AjaxResult.success("success");
+    @GetMapping("/getList")
+    public AjaxResult getList(DetectionTask task) {
+        QueryWrapper<DetectionTask> queryWrapper = new QueryWrapper<>();
+        if (task.getTaskId() != null) {
+            queryWrapper.eq("task_id", task.getTaskId());
+        }
+        List<DetectionTask> taskList = detectionTaskMapper.selectList(queryWrapper);
+        return AjaxResult.success("success", taskList);
+    }
+
+    @PostMapping("/evaluate")
+    public AjaxResult evaluate(@RequestBody Map<String, Object> params) {
+        Long taskID = ((Number) params.get("taskID")).longValue();
+        Integer isRenew = (Integer) params.get("isRenew");
+        String gtPath = (String) params.get("gtPath");
+
+        DetectionTask task =detectionTaskMapper.selectById(taskID);
+        task.setJpgFile(hsiFileMapper.selectOne(new LambdaQueryWrapper<HsiFile>().eq(HsiFile::getFileId, task.getJpgFileId())));
+        task.setMatFile(hsiFileMapper.selectOne(new LambdaQueryWrapper<HsiFile>().eq(HsiFile::getFileId, task.getMatFileId())));
+        task.setGtFile(hsiFileMapper.selectOne(new LambdaQueryWrapper<HsiFile>().eq(HsiFile::getStoragePath, gtPath)));
+        if (task.getGtFileId() != null && isRenew == 0) {
+            return AjaxResult.success("已存在数据", task);
+        }
+        task.setGtFileId(task.getGtFile().getFileId());
+        detectionTaskMapper.updateById(task);
+        task = predictService.executeEvaluate(task);
+        return AjaxResult.success("评估成功", task);
+
     }
 }
