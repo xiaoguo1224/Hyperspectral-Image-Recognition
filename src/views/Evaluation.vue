@@ -533,7 +533,7 @@ onMounted(() => {
 
 .v-tag {
   position: absolute;
-  top: 10px;
+  top: 5px;
   left: 10px;
   padding: 4px 10px;
   border-radius: 4px;
