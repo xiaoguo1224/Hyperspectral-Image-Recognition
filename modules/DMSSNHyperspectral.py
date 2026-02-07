@@ -7,9 +7,15 @@ from torchvision import utils
 # 确保导入路径正确，根据你的 Flask 目录结构调整
 from assistant.dataloader import HL_SC
 from models.DSST import ACEN
+import numpy as np
+import scipy.io as sio
+from models.evaluate_function import *
+from skimage import io, transform
+
+warnings.filterwarnings("ignore")
 
 
-class HyperspectralInference:
+class DMSSNHyperspectral:
     def __init__(self, model_path='/static/DMSSN_double_epoch_100.pth', output_dir='/static/results/'):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.output_dir = output_dir
@@ -43,6 +49,36 @@ class HyperspectralInference:
         input_tensor = torch.swapaxes(input_tensor, 2, 1)
         utils.save_image(input_tensor, filename)
 
+    def get_spectral_curve(self, mat_path):
+        # 1. 加载 mat 文件
+        data_map = sio.loadmat(mat_path)
+
+        # 2. 获取数据矩阵 (请确认你的 mat 文件中的 key 是什么，通常是 'data' 或文件名)
+        # 假设你的维度是 [200, 512, 512]
+        # 如果维度是 [512, 512, 200]，请根据实际情况调整索引
+        cube = None
+        for key in data_map.keys():
+            if not key.startswith('__'):
+                cube = data_map[key]
+                break
+
+        if cube is None:
+            return []
+
+        # 3. 提取特征点的光谱曲线
+        # 方案 A：提取中心点的光谱 (256, 256)
+        # 如果维度是 [C, H, W]
+        curve = cube[:, 256, 256]
+
+        # 方案 B：提取全图平均光谱 (更有代表性)
+        # curve = np.mean(cube, axis=(1, 2))
+
+        # 4. 归一化处理 (确保值在 0-1 之间，方便前端展示)
+        if np.max(curve) > 1:
+            curve = curve.astype(float) / np.max(cube)
+
+        return curve.tolist()  # 转换为 List 方便 JSON 序列化
+
     def predict(self, pic_list, file_list, batch_size=6):
         test_loader = self._data_process(pic_list, file_list, batch_size)
         complete_file_list = []
@@ -71,10 +107,39 @@ class HyperspectralInference:
 
         return error_list, complete_file_list
 
+    def evaluate(self, pic_path, gt_path):
+        # 1. 读取预测图 (Prediction)
+        image = io.imread(pic_path)
+        if len(image.shape) == 2:
+            h, w = image.shape[0], image.shape[1]
+            image = np.swapaxes(image, 1, 0)
+            image = image.astype(np.float32)
+        if len(image.shape) == 3:
+            h, w, c = image.shape[0], image.shape[1], image.shape[2]
+            image = np.swapaxes(image, 2, 0)
+            image = image.astype(np.float32)
+        label = io.imread(gt_path)
+        # print(image.shape,label.shape)
+        # label = np.swapaxes(label, 1, 2)
+        label = transform.resize(label, (h, w, 3))
+        label = np.swapaxes(label, 2, 0)
+        label = label.astype(np.float32)
+        mae_, pre_, rec_, f_1_, auc_, cc_, nss_ = evaluate(image, label)
+        dataMap = {
+            "mae": float(mae_),  # 强制转换为 python float
+            "pred": float(pre_),
+            "rec": float(rec_),
+            "f1": float(f_1_),
+            "auc": float(auc_),
+            "cc": float(cc_),
+            "nss": float(nss_),
+        }
+        return dataMap
+
 
 if __name__ == '__main__':
     # 全局初始化，模型只加载一次
-    infer_engine = HyperspectralInference(
+    infer_engine = DMSSNHyperspectral(
         model_path='/static/DMSSN_double_epoch_100.pth',
         output_dir='/static/results/'
     )
