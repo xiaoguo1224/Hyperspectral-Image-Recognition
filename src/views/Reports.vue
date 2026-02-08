@@ -211,6 +211,7 @@ import {ref, onMounted, computed} from 'vue';
 import {ElMessage} from 'element-plus';
 import {Document, Refresh, Search, Files, View, Download, Check} from '@element-plus/icons-vue';
 import {getList} from '@/api/predict';
+import {exportReportPdf} from '@/api/report';
 import HyperCubeViewer from '@/components/HyperCubeViewer/index.vue';
 
 const loading = ref(false);
@@ -291,12 +292,35 @@ const viewDetail = (row) => {
 };
 
 // 导出 PDF
-const exportPDF = (row) => {
-  if (row.status !== 2) return;
-  ElMessage.success(`正在生成 [${row.fileName || row.taskId}] 的 PDF 报告...`);
-  setTimeout(() => {
-    ElMessage.info("导出功能需集成后端报表服务");
-  }, 1000);
+const exportPDF = async (row) => {
+  try {
+    ElMessage.info(`正在生成 [${row.fileName}] 的 PDF 报告，请稍候...`);
+
+    // 调用 API
+    const res = await exportReportPdf(row.taskId);
+
+    // --- 通用文件下载逻辑 ---
+    const blob = new Blob([res]); // 创建 blob 对象
+    const fileName = `Report_${row.taskId}.pdf`;
+
+    // 创建一个临时的 <a> 标签来触发下载
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = fileName;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+
+    link.click(); // 触发点击
+
+    // 清理
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(link.href);
+
+    ElMessage.success("下载成功！");
+  } catch (error) {
+    console.error(error);
+    ElMessage.error("导出失败，请检查服务器日志");
+  }
 };
 
 onMounted(() => {
