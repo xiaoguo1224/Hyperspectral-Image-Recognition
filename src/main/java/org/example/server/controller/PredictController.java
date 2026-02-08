@@ -99,6 +99,7 @@ public class PredictController {
         detectionTaskMapper.updateById(task);
         task = predictService.executeEvaluate(task);
         return AjaxResult.success("评估成功", task);
-
     }
+
+
 }

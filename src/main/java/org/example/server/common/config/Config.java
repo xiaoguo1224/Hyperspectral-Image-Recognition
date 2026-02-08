@@ -93,4 +93,37 @@ public class Config {
     public static String getUploadPath() {
         return getProfile() + "/upload";
     }
+
+    /*
+     * 获取绝对路径*/
+    public static String getabsolutePath(String rawPath) {
+        String dbPath = rawPath.replace("\\", "/");
+        // 转换为绝对路径传给 Flask
+        String profilePath = getProfile().replace("\\", "/");
+        return profilePath + dbPath.substring("/profile".length());
+    }
+
+    /**
+     * 统一路径处理逻辑：绝对路径 -> /profile 相对路径，并统一斜杠
+     */
+    public static String formatPath(String rawAbsolutePath) {
+        if (rawAbsolutePath == null) return null;
+
+        // 统一为正斜杠
+        String absolutePath = rawAbsolutePath.replace("\\", "/");
+        String profileRoot = Config.getProfile().replace("\\", "/");
+
+        String relativePath = "";
+        if (absolutePath.contains(profileRoot)) {
+            relativePath = absolutePath.substring(profileRoot.length());
+        } else {
+            relativePath = absolutePath;
+        }
+
+        // 确保以 / 开头并拼接前缀
+        if (!relativePath.startsWith("/")) {
+            relativePath = "/" + relativePath;
+        }
+        return "/profile" + relativePath;
+    }
 }
