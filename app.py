@@ -1,5 +1,7 @@
 from flask import Flask, request, jsonify
 
+from modules.VisualController import get_optimized_cube_data
+
 app = Flask(__name__)
 import os
 # 假设这段代码是在 app.py 中运行的
@@ -43,7 +45,7 @@ def run_prediction():
         })
 
     return jsonify({
-        "status": "success",
+        "code": 200,
         "completed_files": results_with_data,
         "failed_ids": errors
     })
@@ -55,9 +57,19 @@ def evaluate():
     gt_path = request.json.get('gt_path')
     dataMap = dmmsn_engine.evaluate(pic_path, gt_path)
     return jsonify({
-        "status": "success",
+        "code": 200,
         "data": dataMap
     })
+
+
+@app.route('/visual/cube-heavy', methods=['POST'])
+def get_heavy_cube():
+    path = request.json.get('path')
+
+    data = get_optimized_cube_data(path)
+    if data:
+        return jsonify({"code": 200, "data": data})
+    return jsonify({"code": 500, "msg": "Error"})
 
 
 if __name__ == '__main__':
