@@ -188,6 +188,13 @@
             </div>
           </div>
         </div>
+        <div class="cube-section mt-20">
+          <div class="section-title">3D 光谱立方体可视化 (Spectral Cube)</div>
+          <hyper-cube-viewer
+              v-if="dialogVisible && currentReport"
+              :mat="currentReport.matFile||currentReport.matFileId"
+          />
+        </div>
       </div>
       <template #footer>
         <span class="dialog-footer">
@@ -204,6 +211,7 @@ import {ref, onMounted, computed} from 'vue';
 import {ElMessage} from 'element-plus';
 import {Document, Refresh, Search, Files, View, Download, Check} from '@element-plus/icons-vue';
 import {getList} from '@/api/predict';
+import HyperCubeViewer from '@/components/HyperCubeViewer/index.vue';
 
 const loading = ref(false);
 const reportList = ref([]);
