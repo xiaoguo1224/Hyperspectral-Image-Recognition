@@ -21,7 +21,7 @@ class Config:
 
     # 路径配置
     BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-    PAPERS_DIR = os.path.join(BASE_DIR, "data/papers")
+    PAPERS_DIR = os.path.join(BASE_DIR, "papers")
     DB_DIR = os.path.join(BASE_DIR, "chroma_db")
 
     # Redis 配置
