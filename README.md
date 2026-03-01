@@ -1,0 +1,1 @@
+# Server Module`n`n后端服务器模块`n`n## 功能`n`n- RESTful API 服务`n- 模型推理服务`n- 数据处理服务`n`n## 相关分支`n`n- [master](../tree/master)`n- [branch-model](../tree/branch-model)`n- [branch-rag](../tree/branch-rag)`n- [branch-web](../tree/branch-web)
