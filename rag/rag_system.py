@@ -18,7 +18,7 @@ from rag.memory_manager import MemoryManager, get_memory_manager
 from typing import Generator, Tuple
 
 # 自定义 RAG Prompt 模板 - 包含对话历史
-RAG_PROMPT_TEMPLATE = """基于以下上下文信息回答问题。如果上下文中没有相关信息，请说明你不知道，你可以根据自己的知识来回答，但不要编造答案。
+RAG_PROMPT_TEMPLATE = """基于以下上下文信息回答问题。如果上下文中没有相关信息，那你可以根据自己的知识来回答，但不要编造答案。
 
 上下文：
 {context}
