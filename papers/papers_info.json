@@ -1,0 +1,246 @@
+[
+  {
+    "title": "MediX-R1: Open Ended Medical Reinforcement Learning",
+    "summary": "We introduce MediX-R1, an open-ended Reinforcement Learning (RL) framework for medical multimodal large language models (MLLMs) that enables clinically grounded, free-form answers beyond multiple-choice formats. MediX-R1 fine-tunes a baseline vision-language backbone with Group Based RL and a composite reward tailored for medical reasoning: an LLM-based accuracy reward that judges semantic correctness with a strict YES/NO decision, a medical embedding-based semantic reward to capture paraphrases and terminology variants, and lightweight format and modality rewards that enforce interpretable reasoning and modality recognition. This multi-signal design provides stable, informative feedback for open-ended outputs where traditional verifiable or MCQ-only rewards fall short. To measure progress, we propose a unified evaluation framework for both text-only and image+text tasks that uses a Reference-based LLM-as-judge in place of brittle string-overlap metrics, capturing semantic correctness, reasoning, and contextual alignment. Despite using only $\\sim51$K instruction examples, MediX-R1 achieves excellent results across standard medical LLM (text-only) and VLM (image + text) benchmarks, outperforming strong open-source baselines and delivering particularly large gains on open-ended clinical tasks. Our results demonstrate that open-ended RL with comprehensive reward signals and LLM-based evaluation is a practical path toward reliable medical reasoning in multimodal models. Our trained models, curated datasets and source code are available at https://medix.cvmbzuai.com",
+    "published": "2026-02-26T18:59:46Z",
+    "authors": [
+      "Sahal Shaji Mullappilly",
+      "Mohammed Irfan Kurpath",
+      "Omair Mohamed",
+      "Mohamed Zidan",
+      "Fahad Khan",
+      "Salman Khan",
+      "Rao Anwer",
+      "Hisham Cholakkal"
+    ],
+    "pdf_url": "https://arxiv.org/pdf/2602.23363v1",
+    "arxiv_id": "2602.23363v1",
+    "source": "arXiv"
+  },
+  {
+    "title": "VGG-T$^3$: Offline Feed-Forward 3D Reconstruction at Scale",
+    "summary": "We present a scalable 3D reconstruction model that addresses a critical limitation in offline feed-forward methods: their computational and memory requirements grow quadratically w.r.t. the number of input images. Our approach is built on the key insight that this bottleneck stems from the varying-length Key-Value (KV) space representation of scene geometry, which we distill into a fixed-size Multi-Layer Perceptron (MLP) via test-time training. VGG-T$^3$ (Visual Geometry Grounded Test Time Training) scales linearly w.r.t. the number of input views, similar to online models, and reconstructs a $1k$ image collection in just $54$ seconds, achieving a $11.6\\times$ speed-up over baselines that rely on softmax attention. Since our method retains global scene aggregation capability, our point map reconstruction error outperforming other linear-time methods by large margins. Finally, we demonstrate visual localization capabilities of our model by querying the scene representation with unseen images.",
+    "published": "2026-02-26T18:59:33Z",
+    "authors": [
+      "Sven Elflein",
+      "Ruilong Li",
+      "Sérgio Agostinho",
+      "Zan Gojcic",
+      "Laura Leal-Taixé",
+      "Qunjie Zhou",
+      "Aljosa Osep"
+    ],
+    "pdf_url": "https://arxiv.org/pdf/2602.23361v1",
+    "arxiv_id": "2602.23361v1",
+    "source": "arXiv"
+  },
+  {
+    "title": "SeeThrough3D: Occlusion Aware 3D Control in Text-to-Image Generation",
+    "summary": "We identify occlusion reasoning as a fundamental yet overlooked aspect for 3D layout-conditioned generation. It is essential for synthesizing partially occluded objects with depth-consistent geometry and scale. While existing methods can generate realistic scenes that follow input layouts, they often fail to model precise inter-object occlusions. We propose SeeThrough3D, a model for 3D layout conditioned generation that explicitly models occlusions. We introduce an occlusion-aware 3D scene representation (OSCR), where objects are depicted as translucent 3D boxes placed within a virtual environment and rendered from desired camera viewpoint. The transparency encodes hidden object regions, enabling the model to reason about occlusions, while the rendered viewpoint provides explicit camera control during generation. We condition a pretrained flow based text-to-image image generation model by introducing a set of visual tokens derived from our rendered 3D representation. Furthermore, we apply masked self-attention to accurately bind each object bounding box to its corresponding textual description, enabling accurate generation of multiple objects without object attribute mixing. To train the model, we construct a synthetic dataset with diverse multi-object scenes with strong inter-object occlusions. SeeThrough3D generalizes effectively to unseen object categories and enables precise 3D layout control with realistic occlusions and consistent camera control.",
+    "published": "2026-02-26T18:59:05Z",
+    "authors": [
+      "Vaibhav Agrawal",
+      "Rishubh Parihar",
+      "Pradhaan Bhat",
+      "Ravi Kiran Sarvadevabhatla",
+      "R. Venkatesh Babu"
+    ],
+    "pdf_url": "https://arxiv.org/pdf/2602.23359v1",
+    "arxiv_id": "2602.23359v1",
+    "source": "arXiv"
+  },
+  {
+    "title": "A Dataset is Worth 1 MB",
+    "summary": "A dataset server must often distribute the same large payload to many clients, incurring massive communication costs. Since clients frequently operate on diverse hardware and software frameworks, transmitting a pre-trained model is often infeasible; instead, agents require raw data to train their own task-specific models locally. While dataset distillation attempts to compress training signals, current methods struggle to scale to high-resolution data and rarely achieve sufficiently small files. In this paper, we propose Pseudo-Labels as Data (PLADA), a method that completely eliminates pixel transmission. We assume agents are preloaded with a large, generic, unlabeled reference dataset (e.g., ImageNet-1K, ImageNet-21K) and communicate a new task by transmitting only the class labels for specific images. To address the distribution mismatch between the reference and target datasets, we introduce a pruning mechanism that filters the reference dataset to retain only the labels of the most semantically relevant images for the target task. This selection process simultaneously maximizes training efficiency and minimizes transmission payload. Experiments on 10 diverse datasets demonstrate that our approach can transfer task knowledge with a payload of less than 1 MB while retaining high classification accuracy, offering a promising solution for efficient dataset serving.",
+    "published": "2026-02-26T18:59:03Z",
+    "authors": [
+      "Elad Kimchi Shoshani",
+      "Leeyam Gabay",
+      "Yedid Hoshen"
+    ],
+    "pdf_url": "https://arxiv.org/pdf/2602.23358v1",
+    "arxiv_id": "2602.23358v1",
+    "source": "arXiv"
+  },
+  {
+    "title": "SOTAlign: Semi-Supervised Alignment of Unimodal Vision and Language Models via Optimal Transport",
+    "summary": "The Platonic Representation Hypothesis posits that neural networks trained on different modalities converge toward a shared statistical model of the world. Recent work exploits this convergence by aligning frozen pretrained vision and language models with lightweight alignment layers, but typically relies on contrastive losses and millions of paired samples. In this work, we ask whether meaningful alignment can be achieved with substantially less supervision. We introduce a semi-supervised setting in which pretrained unimodal encoders are aligned using a small number of image-text pairs together with large amounts of unpaired data. To address this challenge, we propose SOTAlign, a two-stage framework that first recovers a coarse shared geometry from limited paired data using a linear teacher, then refines the alignment on unpaired samples via an optimal-transport-based divergence that transfers relational structure without overconstraining the target space. Unlike existing semi-supervised methods, SOTAlign effectively leverages unpaired images and text, learning robust joint embeddings across datasets and encoder pairs, and significantly outperforming supervised and semi-supervised baselines.",
+    "published": "2026-02-26T18:55:06Z",
+    "authors": [
+      "Simon Roschmann",
+      "Paul Krzakala",
+      "Sonia Mazelet",
+      "Quentin Bouniot",
+      "Zeynep Akata"
+    ],
+    "pdf_url": "https://arxiv.org/pdf/2602.23353v1",
+    "arxiv_id": "2602.23353v1",
+    "source": "arXiv"
+  },
+  {
+    "title": "Lumosaic: Hyperspectral Video via Active Illumination and Coded-Exposure Pixels",
+    "summary": "We present Lumosaic, a compact active hyperspectral video system designed for real-time capture of dynamic scenes. Our approach combines a narrowband LED array with a coded-exposure-pixel (CEP) camera capable of high-speed, per-pixel exposure control, enabling joint encoding of scene information across space, time, and wavelength within each video frame. Unlike passive snapshot systems that divide light across multiple spectral channels simultaneously and assume no motion during a frame's exposure, Lumosaic actively synchronizes illumination and pixel-wise exposure, improving photon utilization and preserving spectral fidelity under motion. A learning-based reconstruction pipeline then recovers 31-channel hyperspectral (400-700 nm) video at 30 fps and VGA resolution, producing temporally coherent and spectrally accurate reconstructions. Experiments on synthetic and real data demonstrate that Lumosaic significantly improves reconstruction fidelity and temporal stability over existing snapshot hyperspectral imaging systems, enabling robust hyperspectral video across diverse materials and motion conditions.",
+    "published": "2026-02-25T17:42:44Z",
+    "authors": [
+      "Dhruv Verma",
+      "Andrew Qiu",
+      "Roberto Rangel",
+      "Ayandev Barman",
+      "Hao Yang",
+      "Chenjia Hu",
+      "Fengqi Zhang",
+      "Roman Genov",
+      "David B. Lindell",
+      "Kiriakos N. Kutulakos",
+      "Alex Mariakakis"
+    ],
+    "pdf_url": "https://arxiv.org/pdf/2602.22140v1",
+    "arxiv_id": "2602.22140v1",
+    "source": "arXiv"
+  },
+  {
+    "title": "Inspectorch: Efficient rare event exploration in solar observations",
+    "summary": "The Sun is observed in unprecedented detail, enabling studies of its activity on very small spatiotemporal scales. However, the large volume of data collected by our telescopes cannot be fully analyzed with conventional methods. Popular machine learning methods identify general trends from observations, but tend to overlook unusual events due to their low frequency of occurrence. We study the applicability of unsupervised probabilistic methods to efficiently identify rare events in multidimensional solar observations and optimize our computational resources to the study of these extreme phenomena. We introduce Inspectorch, an open-source framework that utilizes flow-based models: flexible density estimators capable of learning the multidimensional distribution of solar observations. Once optimized, it assigns a probability to each sample, allowing us to identify unusual events. We apply this approach by applying it to observations from the Hinode Spectro-Polarimeter, the Interface Region Imaging Spectrograph, the Microlensed Hyperspectral Imager at Swedish 1-m Solar Telescope, the Atmospheric Imaging Assembly on board the Solar Dynamics Observatory and the Extreme Ultraviolet Imager on board Solar Orbiter. We find that the algorithm assigns consistently lower probabilities to spectra that exhibit unusual features. For example, it identifies profiles with very strong Doppler shifts, uncommon broadening, and temporal dynamics associated with small-scale reconnection events, among others. As a result, Inspectorch demonstrates that density estimation using flow-based models offers a powerful approach to identifying rare events in large solar datasets. The resulting probabilistic anomaly scores allow computational resources to be focused on the most informative and physically relevant events. We make our Python package publicly available at https://github.com/cdiazbas/inspectorch.",
+    "published": "2026-02-23T20:03:08Z",
+    "authors": [
+      "C. J. Díaz Baso",
+      "I. J. Soler Poquet",
+      "C. Kuckein",
+      "M. van Noort",
+      "N. Poirier"
+    ],
+    "pdf_url": "https://arxiv.org/pdf/2602.20316v1",
+    "arxiv_id": "2602.20316v1",
+    "source": "arXiv"
+  },
+  {
+    "title": "A Physics-Regularized Neural Network and Kirchhoff Markov Random Field Framework for Inferring Internal Electrochemical States from Operando Spectromicroscopy",
+    "summary": "Quantitative understanding of coupled reaction and transport processes in lithium-ion battery (LIB) composite electrodes remains challenging because key internal states cannot be measured directly. In this study, we develop a physics-integrated, data-driven analysis pipeline to estimate internal electrochemical states from operando microscopic X-ray absorption fine structure ($μ$-XAFS) hyperspectral data of LIB cathodes with LiPF$_6$ electrolyte. State-of-charge (SOC) maps are first constructed from Co K-edge spectra. To resolve ambiguities in the two-phase reaction region, a physics-regularized three-layer neural network is introduced, enforcing spatial continuity of SOC and current conservation. The inferred SOC dynamics are then incorporated into a Kirchhoff-based Markov random field framework that integrates Kirchhoff's current and voltage laws, Ohm's law, and a symmetric Butler-Volmer relation to estimate interfacial current, ionic current, electrolyte potential, and effective ionic conductivity. Application to composite electrodes with different initial electrolyte concentrations (0.3, 1, and 2M LiPF$_6$) reveals distinct reaction propagation behaviors governed by electrolyte concentration-dependent conductivity. The inferred electrolyte concentration distributions show qualitative agreement with independent operando X-ray transmission imaging performed on LIB composite cathodes employing a LiAsF$_6$ electrolyte. This framework enables quantitative visualization of otherwise inaccessible internal transport phenomena.",
+    "published": "2026-02-23T14:32:30Z",
+    "authors": [
+      "Naoki Wada",
+      "Yuta Kimura",
+      "Masaichiro Mizumaki",
+      "Koji Amezawa",
+      "Ichiro Akai",
+      "Toru Aonishi"
+    ],
+    "pdf_url": "https://arxiv.org/pdf/2602.19888v1",
+    "arxiv_id": "2602.19888v1",
+    "source": "arXiv"
+  },
+  {
+    "title": "HS-3D-NeRF: 3D Surface and Hyperspectral Reconstruction From Stationary Hyperspectral Images Using Multi-Channel NeRFs",
+    "summary": "Advances in hyperspectral imaging (HSI) and 3D reconstruction have enabled accurate, high-throughput characterization of agricultural produce quality and plant phenotypes, both essential for advancing agricultural sustainability and breeding programs. HSI captures detailed biochemical features of produce, while 3D geometric data substantially improves morphological analysis. However, integrating these two modalities at scale remains challenging, as conventional approaches involve complex hardware setups incompatible with automated phenotyping systems. Recent advances in neural radiance fields (NeRF) offer computationally efficient 3D reconstruction but typically require moving-camera setups, limiting throughput and reproducibility in standard indoor agricultural environments. To address these challenges, we introduce HSI-SC-NeRF, a stationary-camera multi-channel NeRF framework for high-throughput hyperspectral 3D reconstruction targeting postharvest inspection of agricultural produce. Multi-view hyperspectral data is captured using a stationary camera while the object rotates within a custom-built Teflon imaging chamber providing diffuse, uniform illumination. Object poses are estimated via ArUco calibration markers and transformed to the camera frame of reference through simulated pose transformations, enabling standard NeRF training on stationary-camera data. A multi-channel NeRF formulation optimizes reconstruction across all hyperspectral bands jointly using a composite spectral loss, supported by a two-stage training protocol that decouples geometric initialization from radiometric refinement. Experiments on three agricultural produce samples demonstrate high spatial reconstruction accuracy and strong spectral fidelity across the visible and near-infrared spectrum, confirming the suitability of HSI-SC-NeRF for integration into automated agricultural workflows.",
+    "published": "2026-02-18T23:29:04Z",
+    "authors": [
+      "Kibon Ku",
+      "Talukder Z. Jubery",
+      "Adarsh Krishnamurthy",
+      "Baskar Ganapathysubramanian"
+    ],
+    "pdf_url": "https://arxiv.org/pdf/2602.16950v1",
+    "arxiv_id": "2602.16950v1",
+    "source": "arXiv"
+  },
+  {
+    "title": "Feature Recalibration Based Olfactory-Visual Multimodal Model for Fine-Grained Rice Deterioration Detection",
+    "summary": "Multimodal methods are widely used in rice deterioration detection, which exhibit limited capability in representing and extracting fine-grained abnormal features. Moreover, these methods rely on devices, such as hyperspectral cameras and mass spectrometers, increasing detection costs and prolonging data acquisition time. To address these issues, we propose a feature recalibration based olfactory-visual multimodal model for fine-grained rice deterioration detection. The fine-grained deterioration embedding constructor (FDEC) is proposed to reconstruct the labeled multimodal embedded-feature dataset, enhancing sample representation. The fine-grained deterioration recalibration attention network (FDRA-Net) is proposed to emphasize signal variations and increase sensitivity to fine-grained deterioration on the rice surface. Experiments show that the proposed method achieves a classification accuracy of 99.89%. Compared with state-of-the-art methods, the detection accuracy is improved and the procedure is simplified. Furthermore, field detection demonstrates the advantages of accuracy and operational simplicity. The proposed method can also be extended to other agrifood in agriculture and food industry.",
+    "published": "2026-02-16T02:26:51Z",
+    "authors": [
+      "Rongqiang Zhao",
+      "Hengrui Hu",
+      "Yijing Wang",
+      "Mingchun Sun",
+      "Jie Liu"
+    ],
+    "pdf_url": "https://arxiv.org/pdf/2602.14408v1",
+    "arxiv_id": "2602.14408v1",
+    "source": "arXiv"
+  },
+  {
+    "title": "Sensor Generalization for Adaptive Sensing in Event-based Object Detection via Joint Distribution Training",
+    "summary": "Bio-inspired event cameras have recently attracted significant research due to their asynchronous and low-latency capabilities. These features provide a high dynamic range and significantly reduce motion blur. However, because of the novelty in the nature of their output signals, there is a gap in the variability of available data and a lack of extensive analysis of the parameters characterizing their signals. This paper addresses these issues by providing readers with an in-depth understanding of how intrinsic parameters affect the performance of a model trained on event data, specifically for object detection. We also use our findings to expand the capabilities of the downstream model towards sensor-agnostic robustness.",
+    "published": "2026-02-26T18:57:52Z",
+    "authors": [
+      "Aheli Saha",
+      "René Schuster",
+      "Didier Stricker"
+    ],
+    "pdf_url": "https://arxiv.org/pdf/2602.23357v1",
+    "arxiv_id": "2602.23357v1",
+    "source": "arXiv"
+  },
+  {
+    "title": "Stark localization of interacting particles",
+    "summary": "We consider N interacting quantum particles on a one-dimensional lattice, and subjected to an external linear potential. For N = 1, the corresponding Hamiltonian is explicitly diagonalizable, with superexponentially localized eigenstates. This is called Stark localization. We prove that superexponential spectral localization persists for arbitrary N and every interaction strength.",
+    "published": "2026-02-26T18:54:43Z",
+    "authors": [
+      "Wojciech De Roeck",
+      "Amirali Hannani",
+      "Alessio Lerose",
+      "Nathan Vandenbosch"
+    ],
+    "pdf_url": "https://arxiv.org/pdf/2602.23352v1",
+    "arxiv_id": "2602.23352v1",
+    "source": "arXiv"
+  },
+  {
+    "title": "Ruling Out Spiky WIMP Dark Matter using Indirect Searches",
+    "summary": "The dark matter (DM) density profile in the innermost region of the Galaxy remains an open question. In particular, while adiabatic growth of the supermassive black hole Sgr A$^\\ast$ at the Galactic Center (GC) can induce a 'spike' in central DM density, the existence of such a spike is still under debate. Here we present new constraints on the spike slope $γ_{\\rm sp}$ using conventional DM indirect detection searches. We first recast existing photon and neutrino line searches, which include the contribution from the GC region, into constraints on the thermally-averaged DM annihilation cross section $\\langleσv\\rangle$ in the presence of a DM spike. We then derive new bounds on the spike profile for a generic Weakly Interacting Massive Particle (WIMP) DM scenario, where the thermal freeze-out mechanism fixes the annihilation cross-section at $\\langleσv\\rangle\\sim (2-3) \\times 10^{-26}~{\\rm cm}^3~{\\rm s}^{-1}$. We find that for DM annihilation to photons, constraints from Fermi-LAT and MAGIC rule out spike profiles at the GC for a broad range of WIMP DM masses from 10 GeV to 100 TeV. Our result holds even if the photon channel constitutes only $1\\%$ of the total annihilation rate. For the neutrino channel, we use the IceCube data to constrain the existence of an extremely steep spike in the $\\mathscr{O}(1-10)$ TeV DM mass range. Our analysis can be easily extended to other annihilation channels.",
+    "published": "2026-02-26T18:51:44Z",
+    "authors": [
+      "Dibya S. Chattopadhyay",
+      "P. S. Bhupal Dev",
+      "Yago Porto"
+    ],
+    "pdf_url": "https://arxiv.org/pdf/2602.23348v1",
+    "arxiv_id": "2602.23348v1",
+    "source": "arXiv"
+  },
+  {
+    "title": "Millimeter-Wave RIS: Hardware Design and System-Level Considerations",
+    "summary": "Reconfigurable intelligent surfaces have emerged as a promising hardware platform for shaping wireless propagation environments at millimeter-wave (mm-Wave) frequencies and beyond. While many existing studies emphasize channel modeling and signal processing, practical RIS deployment is fundamentally governed by hardware design choices and their system-level implications. This paper presents a hardware-centric overview of recent mm-Wave RIS developments, covering wideband realizations, high-resolution phase-quantized designs, fully printed low-cost implementations, optically transparent surfaces, RIS-on-chip solutions, and emerging three-dimensional architectures. Key challenges including mutual coupling, calibration, multi-RIS interaction, and frequency-dependent phase control are discussed to bridge hardware realization with system-level optimization. This overview provides practical design insights and aims to guide future RIS research toward scalable, efficient, and practically deployable intelligent surface architectures.",
+    "published": "2026-02-26T18:49:53Z",
+    "authors": [
+      "Ruiqi Wang",
+      "Pinjun Zheng",
+      "Yiming Yang",
+      "Xiarui Su",
+      "Mohammad Vaseem",
+      "Anas Chaaban",
+      "Md. Jahangir Hossain",
+      "Tareq Y. Al-Naffouri",
+      "Atif Shamim"
+    ],
+    "pdf_url": "https://arxiv.org/pdf/2602.23345v1",
+    "arxiv_id": "2602.23345v1",
+    "source": "arXiv"
+  },
+  {
+    "title": "Spectrum-Driven Mixed-Frequency Network for Hyperspectral Salient Object Detection",
+    "journal": "IEEE Transactions on Multimedia",
+    "year": "2024",
+    "authors": [
+      "Peifu Liu",
+      "Tingfa Xu",
+      "Huan Chen",
+      "et al."
+    ],
+    "doi": "10.1109/TMM.2023.3331196",
+    "source": "IEEE TMM (CCF A)",
+    "abstract": "Hyperspectral salient object detection (HSOD) aims to detect spectrally salient objects in hyperspectral images..."
+  },
+  {
+    "title": "HySaDe-Mamba: A Mamba-based Network for Hyperspectral Salient Object Detection",
+    "journal": "IEEE Transactions on Circuits and Systems for Video Technology",
+    "year": "2025",
+    "authors": [
+      "Z.L. Lee",
+      "et al."
+    ],
+    "doi": "10.1109/TCSVT.2025.xxxxx",
+    "source": "IEEE TCSVT (SCI 1 区)",
+    "abstract": "We propose HySaDe-Mamba, a novel Mamba-based network for hyperspectral salient object detection..."
+  }
+]
