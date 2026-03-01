@@ -4,6 +4,8 @@
 """
 import os
 from typing import Optional, List
+
+import json
 from langchain_core.chat_history import BaseChatMessageHistory, InMemoryChatMessageHistory
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.messages import trim_messages, HumanMessage, AIMessage
@@ -133,7 +135,7 @@ class MemoryManager:
         for msg in trimmed_messages:
             self._history.add_message(msg)
 
-        print(f"✂️ 记忆已安全裁剪: {len(messages)} -> {len(trimmed_messages)} 条")
+        print(f"记忆已安全裁剪: {len(messages)} -> {len(trimmed_messages)} 条")
         return len(trimmed_messages)
 
     def get_summary(self, llm: ChatOllama = None) -> str:
@@ -201,23 +203,27 @@ class MemoryManager:
 
     def format_history_for_display(self) -> str:
         """
-        格式化历史记录用于显示
+        格式化历史记录用于前端显示 (返回 JSON 字符串以供前端精准解析)
 
         Returns:
-            str: 格式化后的历史记录
+            str: JSON 格式的字符串，或者空状态提示
         """
         messages = self._history.messages
 
         if not messages:
             return "暂无对话记录"
 
-        lines = []
-        for i, msg in enumerate(messages, 1):
-            role = "👤 用户" if msg.type == "human" else "🤖 AI"
-            content = msg.content[:150] + "..." if len(msg.content) > 150 else msg.content
-            lines.append(f"{i}. {role}:\n   {content}")
+        history_list = []
+        for msg in messages:
+            # 仅提取前端需要的 user (human) 和 ai 消息，忽略 system 提示词等
+            if msg.type in ["human", "AIMessageChunk"]:
+                history_list.append({
+                    "type": "human" if msg.type=="human" else "ai",
+                    "content": msg.content
+                })
 
-        return "\n\n".join(lines)
+        # 将其序列化为 JSON 字符串返回 (ensure_ascii=False 保证中文正常显示)
+        return json.dumps(history_list, ensure_ascii=False)
 
 
 # 全局记忆管理器实例（单例模式）
