@@ -77,6 +77,18 @@ export const constantRoutes = [
         ]
     },
     {
+        path: '/rag',
+        component: Layout,
+        children: [
+            {
+                path: 'index',
+                component: () => import('@/views/RagChat.vue'),
+                name: 'RagChat',
+                meta: {title: 'Rag', icon: 'collection'}
+            }
+        ]
+    },
+    {
         path: '/reports',
         component: Layout,
         children: [

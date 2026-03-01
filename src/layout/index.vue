@@ -43,6 +43,14 @@
           <span>光谱特征库</span>
         </el-menu-item>
 
+
+        <el-menu-item index="/rag/index">
+          <el-icon>
+            <ChatRound/>
+          </el-icon>
+          <span>智能检索问答</span>
+        </el-menu-item>
+
         <el-menu-item index="/reports/index">
           <el-icon>
             <Document/>
@@ -80,7 +88,7 @@ import {computed} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
 import {
   Platform, Histogram, Search, Collection,
-  Document, ArrowDown
+  Document, ArrowDown,ChatRound
 } from '@element-plus/icons-vue';
 
 const route = useRoute();
