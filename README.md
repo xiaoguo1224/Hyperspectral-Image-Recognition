@@ -1,0 +1,1 @@
+# RAG Module`n`n检索增强生成模块`n`n## 功能`n`n- 智能文档检索`n- 知识库管理`n- 语义搜索`n- 问答生成`n`n## 相关分支`n`n- [master](../tree/master)`n- [branch-model](../tree/branch-model)`n- [branch-server](../tree/branch-server)`n- [branch-web](../tree/branch-web)
